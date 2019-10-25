@@ -63,7 +63,7 @@ fn render_circles(draw: &app::Draw, x: f32, y: f32, r: f32, level: u8) {
     }
 
     let stroke_color = if level == 2 {
-        rgba(255.0, 255.0, 255.0, 0.8)
+        rgba(255.0, 255.0, 255.0, 1.0)
     } else {
         rgba(0.0, 0.0, 0.0, 0.5)
     };

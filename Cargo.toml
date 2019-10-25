@@ -395,5 +395,13 @@ path = "examples/offline/tree.rs"
 
 # --------------- My sketches
 [[example]]
-name = "circle"
-path = "src/circle.rs"
+name = "circle_1"
+path = "src/circle/circle1.rs"
+
+[[example]]
+name = "circle_2"
+path = "src/circle/circle2.rs"
+
+[[example]]
+name = "circle_3"
+path = "src/circle/circle3.rs"
