@@ -409,3 +409,7 @@ path = "src/circle/circle_3.rs"
 [[example]]
 name = "circle_rand"
 path = "src/circle/circle_rand.rs"
+
+[[example]]
+name = "circle_rand_anim"
+path = "src/circle/circle_rand_anim.rs"

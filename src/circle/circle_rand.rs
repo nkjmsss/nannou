@@ -28,12 +28,14 @@ struct Circle {
     level: usize,
     child_count: u8,
     color: Rgba<f32>,
+    stroke_weight: f32,
 }
 
 impl Circle {
-    fn new(x: f32, y: f32, r: f32, level: usize) -> Circle {
+    fn new(x: f32, y: f32, r: f32, level: usize) -> Self {
         let child_count = 16;
         let color = rgba(0.0, 0.0, 0.0, 0.5);
+        let stroke_weight = 1.0;
 
         Circle {
             x,
@@ -42,6 +44,7 @@ impl Circle {
             level,
             child_count,
             color,
+            stroke_weight,
         }
     }
 
@@ -55,13 +58,19 @@ impl Circle {
         *self
     }
 
+    fn stroke_weight(&mut self, stroke_weight: f32) -> Self {
+        self.stroke_weight = stroke_weight;
+        *self
+    }
+
     fn draw(&self, draw: &app::Draw) {
         draw.ellipse()
             .x(self.x)
             .y(self.y)
             .radius(self.r)
             .color(rgba(0.0, 0.0, 0.0, 0.0))
-            .stroke(self.color);
+            .stroke(self.color)
+            .stroke_weight(self.stroke_weight);
     }
 }
 
@@ -133,7 +142,7 @@ fn render_circles(draw: &app::Draw, first_circle: Circle) {
     // BFS の順に Circle を格納する
     let mut result: Vec<Circle> = Vec::new();
 
-    // count や color を乱数で生成
+    // count 等を乱数で生成
     let mut rng = rand::thread_rng();
     let counts = (0..)
         .take(first_circle.level as usize)
@@ -147,11 +156,16 @@ fn render_circles(draw: &app::Draw, first_circle: Circle) {
             rgba(v, v, v, alpha)
         })
         .collect::<Vec<_>>();
+    let stroke_weights = (0..)
+        .take(first_circle.level as usize)
+        .map(|_| rng.gen_range(0.5, 2.0))
+        .collect::<Vec<_>>();
 
     while let Some(mut cur) = queue.pop_front() {
         if cur.level > 0 {
             cur.child_count(counts[cur.level - 1]);
             cur.color(colors[cur.level - 1]);
+            cur.stroke_weight(stroke_weights[cur.level - 1]);
             result.push(cur);
 
             for i in 0..cur.child_count {
