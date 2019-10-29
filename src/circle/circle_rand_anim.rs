@@ -1,5 +1,6 @@
 use nannou::prelude::*;
-use rand::prelude::*;
+use rand::seq::SliceRandom;
+use rand::{thread_rng, Rng};
 use std::collections::VecDeque;
 
 const RADIUS: u32 = 320;
@@ -143,13 +144,57 @@ impl CirclesRecursive {
         }
     }
 
-    fn shuffle(&mut self) {
-        let rng = &mut rand::thread_rng();
-        self.circles.shuffle(rng);
+    fn partition_by_level(&self) -> Vec<(usize, usize)> {
+        let len = self
+            .circles
+            .iter()
+            .enumerate()
+            .scan::<Option<Circle>, Option<usize>, _>(None, |prev, (i, circle)| {
+                let res = match *prev {
+                    Some(p) => {
+                        if p.level != circle.level {
+                            Some(i)
+                        } else {
+                            None
+                        }
+                    }
+                    None => Some(i),
+                };
+                *prev = Some(*circle);
+                Some(res)
+            })
+            .filter_map(|i| i)
+            .collect::<Vec<_>>();
+
+        let mut idx = len
+            .iter()
+            .rev()
+            .scan(self.circles.len(), |prev, l| {
+                let res = (*l, *prev);
+                *prev = *l;
+                Some(res)
+            })
+            .collect::<Vec<_>>();
+        idx.reverse();
+        idx
     }
 
-    fn reverse(&mut self) {
+    fn shuffle(&mut self) -> &mut Self {
+        let mut rng = thread_rng();
+
+        self.partition_by_level().iter().for_each(|(start, end)| {
+            let maybe_arr = self.circles.get_mut(*start..*end);
+            if let Some(arr) = maybe_arr {
+                arr.shuffle(&mut rng);
+            }
+        });
+
+        self
+    }
+
+    fn reverse(&mut self) -> &mut Self {
         self.circles.reverse();
+        self
     }
 
     fn update(&mut self) -> &mut Self {
@@ -165,9 +210,16 @@ impl CirclesRecursive {
 
     fn draw(&self, draw: &app::Draw) {
         if let Some(range) = &self.render_queue {
-            if let Some(circles) = self.circles.get(range.start..range.end) {
-                for circle in circles {
-                    circle.draw(draw);
+            match self.circles.get(range.start..range.end) {
+                Some(circles) => {
+                    for circle in circles {
+                        circle.draw(draw);
+                    }
+                }
+                None => {
+                    for circle in self.circles.get(range.start..).unwrap() {
+                        circle.draw(draw);
+                    }
                 }
             }
         }
@@ -199,7 +251,7 @@ fn model(app: &App) -> Model {
         .unwrap();
     let message = Message::Initialize;
     let mut circles = CirclesRecursive::new(0.0, 0.0, RADIUS as f32, 4);
-    circles.shuffle();
+    circles.reverse().shuffle();
 
     Model {
         _window,
@@ -224,6 +276,9 @@ fn update(_app: &App, model: &mut Model, _update: Update) {
                 }
                 Key::Key3 => {
                     model.circles.update().shuffle();
+                }
+                Key::Key4 => {
+                    model.circles.update().reverse().shuffle();
                 }
                 _ => {}
             };
