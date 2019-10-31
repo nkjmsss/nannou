@@ -18,8 +18,8 @@ impl PerlinRect {
         let mesh_count = 500.0;
         let perlin_range = 12.0;
         let (window_width, window_height) = window_size;
-        let w = (window_width as f32) / mesh_count;
-        let h = (window_height as f32) / mesh_count;
+        let w = (window_width as f32) / mesh_count / 2.0;
+        let h = (window_height as f32) / mesh_count / 2.0;
 
         for x in (0..).take(mesh_count as usize).map(|i| (i + 1) as f32) {
             for y in (0..).take(mesh_count as usize).map(|i| (i + 1) as f32) {
@@ -33,8 +33,8 @@ impl PerlinRect {
                     .h(h)
                     .color(rgb(color, color, color))
                     // .color(hsl(color as f32, 0.7, 0.7))
-                    .x((x - mesh_count / 2.0) * w)
-                    .y((y - mesh_count / 2.0) * h);
+                    .x((x - mesh_count / 2.0 - 0.5) * w)
+                    .y((y - mesh_count / 2.0 - 0.5) * h);
             }
         }
     }
