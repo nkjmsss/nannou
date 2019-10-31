@@ -425,3 +425,7 @@ path = "src/waveclock/app.rs"
 [[example]]
 name = "perlin"
 path = "src/perlin/app.rs"
+
+[[example]]
+name = "cell_automata"
+path = "src/cell_automata/app.rs"
