@@ -80,6 +80,7 @@ impl Circle {
         }
     }
 
+    #[allow(dead_code)]
     fn child_count(&mut self, count: u8) -> Self {
         self.child_count = count;
         *self
