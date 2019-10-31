@@ -421,3 +421,7 @@ path = "src/circle/circle_rand_anim.rs"
 [[example]]
 name = "waveclock"
 path = "src/waveclock/app.rs"
+
+[[example]]
+name = "perlin"
+path = "src/perlin/app.rs"
