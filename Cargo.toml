@@ -395,6 +395,10 @@ path = "examples/offline/tree.rs"
 
 # --------------- My sketches
 [[example]]
+name = "template"
+path = "src/template.rs"
+
+[[example]]
 name = "circle_1"
 path = "src/circle/circle_1.rs"
 
@@ -413,3 +417,7 @@ path = "src/circle/circle_rand.rs"
 [[example]]
 name = "circle_rand_anim"
 path = "src/circle/circle_rand_anim.rs"
+
+[[example]]
+name = "waveclock"
+path = "src/waveclock/app.rs"

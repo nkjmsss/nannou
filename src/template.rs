@@ -7,13 +7,13 @@ fn main() {
 struct Model {
     _window: window::Id,
     message: Message,
+    window_event: Option<WindowEvent>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 enum Message {
     Initialize,
     Clear,
-    WindowEvent(WindowEvent),
     RenderReady,
     Nothing,
 }
@@ -27,19 +27,31 @@ fn model(app: &App) -> Model {
         .build()
         .unwrap();
     let message = Message::Initialize;
-    Model { _window, message }
+    let window_event = None;
+
+    Model {
+        _window,
+        message,
+        window_event,
+    }
 }
 
 fn update(_app: &App, model: &mut Model, _update: Update) {
-    match model.message.clone() {
+    if let Some(event) = model.window_event.clone() {
+        model.window_event = None;
+        match event {
+            WindowEvent::KeyPressed(key) => {
+                println!("{:?}", key);
+                model.message = Message::Clear;
+                return;
+            }
+            _ => {}
+        }
+    }
+
+    match model.message {
         Message::Initialize => {
             model.message = Message::Clear;
-        }
-        Message::WindowEvent(ref event) => {
-            model.message = Message::Clear;
-            match event {
-                _ => {}
-            };
         }
         Message::Clear => {
             model.message = Message::RenderReady;
@@ -54,7 +66,7 @@ fn update(_app: &App, model: &mut Model, _update: Update) {
 }
 
 fn window_event(_app: &App, model: &mut Model, event: WindowEvent) {
-    model.message = Message::WindowEvent(event);
+    model.window_event = Some(event);
 }
 
 fn view(app: &App, model: &Model, frame: &Frame) {
@@ -65,7 +77,7 @@ fn view(app: &App, model: &Model, frame: &Frame) {
             draw.background().color(WHITE);
         }
         Message::RenderReady => {
-            // render some staff
+            draw.ellipse().color(BLUE);
         }
         _ => {}
     };
