@@ -1,6 +1,6 @@
 # nannou
 
-[Documentation](https://guide.nannou.cc/welcome.html)
+[Official Documentation](https://guide.nannou.cc/welcome.html)
 
 ## Installation
 
@@ -24,4 +24,4 @@ Official examples directory. [Official Repo](https://github.com/nannou-org/nanno
 
 #### [src](./src)
 
-My original sketches.
+My original sketches. The code structure is inspired by 'The Elm Architecture' which I think is the best webapp framework.
