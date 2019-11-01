@@ -40,10 +40,10 @@ impl CA2dim {
         self.state = next_state;
     }
 
-    pub fn draw(&self, draw: &app::Draw, window_size: (u32, u32)) {
+    pub fn draw(&self, draw: &app::Draw, window_size: (f32, f32)) {
         let (width, height) = window_size;
-        let x_step = (width as f32) / (COUNT as f32) / 2.0;
-        let y_step = (height as f32) / (COUNT as f32) / 2.0;
+        let x_step = width / (COUNT as f32);
+        let y_step = height / (COUNT as f32);
         let half_count = (COUNT as f32) / 2.0 - 0.5;
 
         for i in 0..COUNT {

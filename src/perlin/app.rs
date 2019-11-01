@@ -85,7 +85,7 @@ fn view(app: &App, model: &Model, frame: &Frame) {
         Message::RenderReady => {
             model
                 .perlin_rect
-                .draw(&draw, app.window(model.window).unwrap().inner_size_pixels());
+                .draw(&draw, app.window(model.window).unwrap().rect().w_h());
         }
         _ => {}
     };

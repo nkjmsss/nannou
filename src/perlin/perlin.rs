@@ -14,12 +14,12 @@ impl PerlinRect {
         PerlinRect { perlin_gen }
     }
 
-    pub fn draw(&self, draw: &app::Draw, window_size: (u32, u32)) {
+    pub fn draw(&self, draw: &app::Draw, window_size: (f32, f32)) {
         let mesh_count = 500.0;
         let perlin_range = 12.0;
         let (window_width, window_height) = window_size;
-        let w = (window_width as f32) / mesh_count / 2.0;
-        let h = (window_height as f32) / mesh_count / 2.0;
+        let w = window_width / mesh_count;
+        let h = window_height / mesh_count;
 
         for x in (0..).take(mesh_count as usize).map(|i| (i + 1) as f32) {
             for y in (0..).take(mesh_count as usize).map(|i| (i + 1) as f32) {
