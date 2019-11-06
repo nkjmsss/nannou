@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 use nannou::prelude::*;
-use rand::{thread_rng, Rng};
+use nannou::rand::{thread_rng, Rng};
 
 const COUNT: usize = 121;
 

@@ -1,6 +1,6 @@
 use nannou::noise::{NoiseFn, Perlin, Seedable};
 use nannou::prelude::*;
-use rand::{thread_rng, Rng};
+use nannou::rand::{thread_rng, Rng};
 
 struct Coordinate<T> {
     x: T,

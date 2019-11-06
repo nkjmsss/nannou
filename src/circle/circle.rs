@@ -1,28 +1,11 @@
+#![allow(dead_code)]
 use nannou::prelude::*;
-use rand::seq::SliceRandom;
-use rand::{thread_rng, Rng};
+use nannou::rand::seq::SliceRandom;
+use nannou::rand::{thread_rng, Rng};
 use std::collections::VecDeque;
 
 const RADIUS: u32 = 320;
 const SIZE: u32 = 700;
-
-fn main() {
-    nannou::app(model).update(update).run();
-}
-
-struct Model {
-    _window: window::Id,
-    message: Message,
-    circles: CirclesRecursive,
-}
-
-enum Message {
-    Initialize,
-    Clear,
-    KeyPressed(Key),
-    RenderReady,
-    Nothing,
-}
 
 #[derive(Copy, Clone, Debug)]
 struct Circle {
@@ -83,14 +66,14 @@ struct Range {
     end: usize,
 }
 
-struct CirclesRecursive {
+pub struct CirclesRecursive {
     initial_circle: Circle,
     circles: Vec<Circle>,
     render_queue: Option<Range>,
 }
 
 impl CirclesRecursive {
-    fn new(x: f32, y: f32, r: f32, level: usize) -> Self {
+    pub fn new(x: f32, y: f32, r: f32, level: usize) -> Self {
         let mut queue: VecDeque<Circle> = VecDeque::new();
         let initial_circle = Circle::new(x, y, r, level);
         queue.push_back(initial_circle);
@@ -99,7 +82,7 @@ impl CirclesRecursive {
         let mut circles: Vec<Circle> = Vec::new();
 
         // count 等を乱数で生成
-        let rng = &mut rand::thread_rng();
+        let rng = &mut thread_rng();
         let counts = (0..)
             .take(level)
             .map(|_| rng.gen_range(10, 20))
@@ -179,7 +162,7 @@ impl CirclesRecursive {
         idx
     }
 
-    fn shuffle(&mut self) -> &mut Self {
+    pub fn shuffle(&mut self) -> &mut Self {
         let mut rng = thread_rng();
 
         self.partition_by_level().iter().for_each(|(start, end)| {
@@ -192,12 +175,12 @@ impl CirclesRecursive {
         self
     }
 
-    fn reverse(&mut self) -> &mut Self {
+    pub fn reverse(&mut self) -> &mut Self {
         self.circles.reverse();
         self
     }
 
-    fn update(&mut self) -> &mut Self {
+    pub fn update(&mut self) -> &mut Self {
         self.circles = Self::new(
             self.initial_circle.x,
             self.initial_circle.y,
@@ -208,7 +191,7 @@ impl CirclesRecursive {
         self
     }
 
-    fn draw(&self, draw: &app::Draw) {
+    pub fn draw(&self, draw: &app::Draw) {
         if let Some(range) = &self.render_queue {
             match self.circles.get(range.start..range.end) {
                 Some(circles) => {
@@ -225,7 +208,14 @@ impl CirclesRecursive {
         }
     }
 
-    fn add_que(&mut self, count: usize) {
+    pub fn is_que_empty(&self) -> bool {
+        match self.render_queue {
+            None => true,
+            _ => false,
+        }
+    }
+
+    pub fn add_que(&mut self, count: usize) {
         let start = match &self.render_queue {
             Some(range) => range.end + 1,
             None => 0,
@@ -239,104 +229,4 @@ impl CirclesRecursive {
             self.render_queue = None;
         }
     }
-}
-
-fn model(app: &App) -> Model {
-    let _window = app
-        .new_window()
-        .with_dimensions(SIZE, SIZE)
-        .view(view)
-        .event(window_event)
-        .build()
-        .unwrap();
-    let message = Message::Initialize;
-    let mut circles = CirclesRecursive::new(0.0, 0.0, RADIUS as f32, 4);
-    circles.reverse().shuffle();
-
-    Model {
-        _window,
-        message,
-        circles,
-    }
-}
-
-fn update(_app: &App, model: &mut Model, _update: Update) {
-    match model.message {
-        Message::Initialize => {
-            model.message = Message::Clear;
-        }
-        Message::KeyPressed(key) => {
-            model.message = Message::Clear;
-            match key {
-                Key::Key1 => {
-                    model.circles.update();
-                }
-                Key::Key2 => {
-                    model.circles.update().reverse();
-                }
-                Key::Key3 => {
-                    model.circles.update().shuffle();
-                }
-                Key::Key4 => {
-                    model.circles.update().reverse().shuffle();
-                }
-                _ => {}
-            };
-        }
-        Message::Clear => {
-            model.message = Message::RenderReady;
-        }
-        Message::RenderReady => {
-            model.circles.add_que(40);
-            match model.circles.render_queue {
-                None => {
-                    model.message = Message::Nothing;
-                }
-                _ => {}
-            }
-        }
-        _ => {
-            model.message = Message::Nothing;
-        }
-    };
-}
-
-fn window_event(_app: &App, model: &mut Model, event: WindowEvent) {
-    match event {
-        KeyPressed(key) => model.message = Message::KeyPressed(key),
-        KeyReleased(_key) => {}
-        MouseMoved(_pos) => {}
-        MousePressed(_button) => {}
-        MouseReleased(_button) => {}
-        MouseEntered => {}
-        MouseExited => {}
-        MouseWheel(_amount, _phase) => {}
-        Moved(_pos) => {}
-        Resized(_size) => {}
-        Touch(_touch) => {}
-        TouchPressure(_pressure) => {}
-        HoveredFile(_path) => {}
-        DroppedFile(_path) => {}
-        HoveredFileCancelled => {}
-        Focused => {}
-        Unfocused => {}
-        Closed => {}
-    }
-}
-
-fn view(app: &App, model: &Model, frame: &Frame) {
-    let draw = app.draw();
-
-    match model.message {
-        Message::Clear => {
-            draw.background().color(WHITE);
-        }
-        Message::RenderReady => {
-            model.circles.draw(&draw);
-        }
-        _ => {}
-    };
-
-    // Write to the window frame.
-    draw.to_frame(app, &frame).unwrap();
 }

@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 use nannou::noise::{NoiseFn, Perlin, Seedable};
 use nannou::prelude::*;
-use rand::{thread_rng, Rng};
+use nannou::rand::{thread_rng, Rng};
 
 #[derive(Debug, Copy, Clone)]
 pub struct PerlinRect {

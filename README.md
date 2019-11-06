@@ -11,17 +11,14 @@
 ## Running examples
 
 ```bash
-$ cargo run --release --example [[name]]
+$ cargo run --release --example [[sketch_name]]
 ```
 
-Names are listed in [Cargo.toml](./Cargo.toml).
+### Examples list
 
-## Directory Structure
+Ordered by created date.
 
-#### [examples](./examples)
-
-Official examples directory. [Official Repo](https://github.com/nannou-org/nannou)
-
-#### [src](./src)
-
-My original sketches. The code structure is inspired by 'The Elm Architecture' which I think is the best webapp framework.
+- [perlin](./src/perlin)
+- [circle](./src/circle)
+- [waveclock](./src/waveclock)
+- [cell_automata](./src/cell_automata)
