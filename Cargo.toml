@@ -1,6 +1,8 @@
 [workspace]
 
 members = [
+  "nannou",
+
   "sketches/cell_automata",
   "sketches/circle",
   "sketches/perlin",
