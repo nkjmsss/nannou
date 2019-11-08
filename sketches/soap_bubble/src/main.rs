@@ -1,9 +1,10 @@
-use nannou::prelude::*;
+extern crate camera;
 mod soap_bubble;
-use soap_bubble::SoapBubble;
-mod camera;
+
 use camera::Camera;
+use nannou::prelude::*;
 use nannou::rand::{thread_rng, Rng};
+use soap_bubble::SoapBubble;
 
 fn main() {
     nannou::app(model).update(update).run();

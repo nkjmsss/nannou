@@ -121,9 +121,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "camera"
+version = "0.1.0"
+dependencies = [
+ "nannou 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "cc"
 version = "1.0.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "cell_automata"
+version = "0.1.0"
+dependencies = [
+ "nannou 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "cfg-if"
@@ -139,6 +153,13 @@ dependencies = [
  "num-traits 0.1.43 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.102 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "circle"
+version = "0.1.0"
+dependencies = [
+ "nannou 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -831,13 +852,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "nannou_practice"
-version = "0.1.0"
-dependencies = [
- "nannou 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "nix"
 version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1108,6 +1122,13 @@ dependencies = [
 name = "percent-encoding"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "perlin"
+version = "0.1.0"
+dependencies = [
+ "nannou 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "petgraph"
@@ -1464,6 +1485,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "rotation"
+version = "0.1.0"
+dependencies = [
+ "nannou 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "rust-argon2"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1680,6 +1708,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "soap_bubble"
+version = "0.1.0"
+dependencies = [
+ "camera 0.1.0",
+ "nannou 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rotation 0.1.0",
+]
+
+[[package]]
 name = "socket2"
 version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1864,6 +1901,13 @@ dependencies = [
 name = "wasi"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "waveclock"
+version = "0.1.0"
+dependencies = [
+ "nannou 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "wayland-client"

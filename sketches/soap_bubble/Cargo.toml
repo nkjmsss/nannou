@@ -1,0 +1,13 @@
+[package]
+name = "soap_bubble"
+version = "0.1.0"
+authors = ["nkjmsss"]
+edition = "2018"
+publish = false
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+nannou = "0.12"
+rotation = { path = "../../utils/rotation" }
+camera = { path = "../../utils/camera" }

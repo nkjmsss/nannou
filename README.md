@@ -11,14 +11,15 @@
 ## Running examples
 
 ```bash
-$ cargo run --release --example [[sketch_name]]
+$ cargo run --release -p [[sketch_name]]
 ```
 
 ### Examples list
 
 Ordered by created date.
 
-- [perlin](./src/perlin)
-- [circle](./src/circle)
-- [waveclock](./src/waveclock)
-- [cell_automata](./src/cell_automata)
+- [perlin](./sketches/perlin)
+- [circle](./sketches/circle)
+- [waveclock](./sketches/waveclock)
+- [cell_automata](./sketches/cell_automata)
+- [soap_bubble](./sketches/soap_bubble)

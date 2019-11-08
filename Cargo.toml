@@ -1,36 +1,12 @@
-[package]
-name = "nannou_practice"
-version = "0.1.0"
-authors = ["nkjmsss"]
-edition = "2018"
-publish = false
+[workspace]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+members = [
+  "sketches/cell_automata",
+  "sketches/circle",
+  "sketches/perlin",
+  "sketches/soap_bubble",
+  "sketches/waveclock",
 
-[dependencies]
-nannou = "0.12"
-
-# --------------- Examples
-[[example]]
-name = "template"
-path = "src/template.rs"
-
-[[example]]
-name = "perlin"
-path = "src/perlin/app.rs"
-
-[[example]]
-name = "circle"
-path = "src/circle/app.rs"
-
-[[example]]
-name = "waveclock"
-path = "src/waveclock/app.rs"
-
-[[example]]
-name = "cell_automata"
-path = "src/cell_automata/app.rs"
-
-[[example]]
-name = "soap_bubble"
-path = "src/soap_bubble/app.rs"
+  "utils/camera",
+  "utils/rotation",
+]
