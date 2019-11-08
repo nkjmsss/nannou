@@ -30,3 +30,7 @@ path = "src/waveclock/app.rs"
 [[example]]
 name = "cell_automata"
 path = "src/cell_automata/app.rs"
+
+[[example]]
+name = "soap_bubble"
+path = "src/soap_bubble/app.rs"

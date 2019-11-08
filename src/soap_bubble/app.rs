@@ -1,4 +1,9 @@
 use nannou::prelude::*;
+mod soap_bubble;
+use soap_bubble::SoapBubble;
+mod camera;
+use camera::Camera;
+use nannou::rand::{thread_rng, Rng};
 
 fn main() {
     nannou::app(model).update(update).run();
@@ -8,6 +13,8 @@ struct Model {
     _window: window::Id,
     message: Message,
     window_event: Option<WindowEvent>,
+    soap_bubble: SoapBubble,
+    camera: Camera,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -15,11 +22,10 @@ enum Message {
     Initialize,
     Clear,
     RenderReady,
-    Nothing,
 }
 
 fn model(app: &App) -> Model {
-    let _window = app
+    let window = app
         .new_window()
         .with_dimensions(720, 720)
         .view(view)
@@ -28,11 +34,15 @@ fn model(app: &App) -> Model {
         .unwrap();
     let message = Message::Initialize;
     let window_event = None;
+    let soap_bubble = SoapBubble::new(200.0, pt3(0.0, 0.0, 0.0));
+    let camera = Camera::new(app.window(window).unwrap().rect().w_h());
 
     Model {
-        _window,
+        _window: window,
         message,
         window_event,
+        soap_bubble,
+        camera,
     }
 }
 
@@ -40,8 +50,10 @@ fn update(_app: &App, model: &mut Model, _update: Update) {
     if let Some(event) = model.window_event.clone() {
         model.window_event = None;
         match event {
-            WindowEvent::KeyPressed(key) => {
-                println!("{:?}", key);
+            WindowEvent::KeyPressed(_key) => {
+                let mut rng = thread_rng();
+                let hue = rng.gen_range(0.0, 1.0) as f32;
+                model.soap_bubble.color_range((hue, hue + 0.3));
                 model.message = Message::Clear;
                 return;
             }
@@ -57,10 +69,7 @@ fn update(_app: &App, model: &mut Model, _update: Update) {
             model.message = Message::RenderReady;
         }
         Message::RenderReady => {
-            model.message = Message::Nothing;
-        }
-        _ => {
-            model.message = Message::Nothing;
+            model.soap_bubble.update();
         }
     };
 }
@@ -74,10 +83,10 @@ fn view(app: &App, model: &Model, frame: &Frame) {
 
     match model.message {
         Message::Clear => {
-            frame.clear(WHITE);
+            frame.clear(BLACK);
         }
         Message::RenderReady => {
-            draw.ellipse().color(BLUE);
+            model.soap_bubble.draw(&draw, &model.camera);
         }
         _ => {}
     };
