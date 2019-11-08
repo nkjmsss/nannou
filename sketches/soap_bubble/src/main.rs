@@ -54,7 +54,8 @@ fn update(_app: &App, model: &mut Model, _update: Update) {
             WindowEvent::KeyPressed(_key) => {
                 let mut rng = thread_rng();
                 let hue = rng.gen_range(0.0, 1.0) as f32;
-                model.soap_bubble.color_range((hue, hue + 0.3));
+                let range = rng.gen_range(0.2, 0.7) as f32;
+                model.soap_bubble.color_range((hue, hue + range));
                 model.message = Message::Clear;
                 return;
             }

@@ -60,7 +60,13 @@ fn update(_app: &App, model: &mut Model, _update: Update) {
                     Key::Key4 => {
                         model.circles.update().reverse().shuffle();
                     }
-                    _ => {}
+                    Key::Key5 => {
+                        model.circles.update().add_que_all();
+                    }
+                    Key::Key6 => {
+                        model.circles.update().reverse().add_que_all();
+                    }
+                    _ => return,
                 }
                 model.message = Message::Clear;
                 return;
@@ -97,7 +103,7 @@ fn view(app: &App, model: &Model, frame: &Frame) {
 
     match model.message {
         Message::Clear => {
-            draw.background().color(WHITE);
+            frame.clear(WHITE);
         }
         Message::RenderReady => {
             model.circles.draw(&draw);

@@ -229,4 +229,8 @@ impl CirclesRecursive {
             self.render_queue = None;
         }
     }
+
+    pub fn add_que_all(&mut self) {
+        self.add_que(self.circles.len());
+    }
 }
