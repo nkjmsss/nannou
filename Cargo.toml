@@ -11,4 +11,5 @@ members = [
 
   "utils/camera",
   "utils/rotation",
+  "utils/screenshot",
 ]
