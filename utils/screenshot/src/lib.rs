@@ -2,6 +2,7 @@ use nannou::prelude::*;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::VecDeque;
+use std::path::{Path, PathBuf};
 use std::slice;
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::sync::Arc;
@@ -25,6 +26,7 @@ pub(crate) struct Buffer {
 
 struct ShotWriter {
     num_images: usize,
+    output_dir: PathBuf,
 }
 
 // Hack to get around wait issue
@@ -35,12 +37,14 @@ pub struct Shots {
     images_out: Sender<Msg>,
     saving_thread: Option<JoinHandle<()>>,
     frame_capture: RefCell<capture::FrameCapture>,
+    basedir: String,
 }
 
 enum Msg {
     Buffer(Buffer),
     Flush,
     Kill,
+    ChangeDir(PathBuf),
 }
 
 #[derive(Default, Debug, Clone)]
@@ -49,43 +53,6 @@ struct Vertex {
 }
 
 vk::impl_vertex!(Vertex, position);
-
-pub fn new(app: &App, window_id: WindowId) -> Shots {
-    let window = app.window(window_id).expect("Failed to get window");
-    let queue = window.swapchain_queue().clone();
-    let dims = {
-        let d = window.inner_size_pixels();
-        (d.0 as usize, d.1 as usize)
-    };
-    let (save_out, images_in) = mpsc::channel();
-    let (images_out, save_in) = mpsc::channel();
-
-    for _ in 0..3 {
-        let output_image = Buffer {
-            buffer: new_screenshot_buffer(queue.device().clone(), (dims.0, dims.1)),
-            dims,
-        };
-        save_out
-            .send(output_image)
-            .expect("Failed to send initial images");
-    }
-    let shot_writer = ShotWriter { num_images: 0 };
-    let saving_thread = thread::spawn({ || save_images(shot_writer, save_in, save_out) });
-    let saving_thread = Some(saving_thread);
-    let frame_capture = RefCell::new(capture::FrameCapture::new(
-        queue.device().clone(),
-        window.msaa_samples(),
-        [dims.0 as u32, dims.1 as u32],
-    ));
-    Shots {
-        num_shots: Cell::new(0),
-        frames_since_empty: Cell::new(3),
-        images_in,
-        images_out,
-        saving_thread,
-        frame_capture,
-    }
-}
 
 fn save_images(mut screenshot: ShotWriter, save_in: Receiver<Msg>, save_out: Sender<Buffer>) {
     let mut q = VecDeque::new();
@@ -112,11 +79,83 @@ fn save_images(mut screenshot: ShotWriter, save_in: Receiver<Msg>, save_out: Sen
                 }
                 return ();
             }
+            Msg::ChangeDir(dir) => {
+                while let Some(image) = q.pop_front() {
+                    screenshot.save(image.clone());
+                    save_out.send(image).ok();
+                }
+                screenshot.output_dir = dir;
+                screenshot.num_images = 0;
+            }
         }
     }
 }
 
 impl Shots {
+    /// returns screenshot save struct
+    ///
+    /// Captured images are saved into `{basedir}/dist/{subdir?}`.
+    /// You can define `subdir` with `Shots::output_dir("subdir")`.
+    ///
+    /// ## Basic usage
+    /// ```
+    /// let screenshot = Shots::new(app, window_id, env!("CARGO_MANIFEST_DIR"));
+    /// screenshot.output_dir("subdir"); // make output dir
+    /// screenshot.capture(&frame); // in view function
+    /// screenshot.take(); // save screenshot
+    /// ```
+    pub fn new(app: &App, window_id: WindowId, basedir: &str) -> Self {
+        let window = app.window(window_id).expect("Failed to get window");
+        let queue = window.swapchain_queue().clone();
+        let dims = {
+            let d = window.inner_size_pixels();
+            (d.0 as usize, d.1 as usize)
+        };
+        let (save_out, images_in) = mpsc::channel();
+        let (images_out, save_in) = mpsc::channel();
+
+        for _ in 0..3 {
+            let output_image = Buffer {
+                buffer: new_screenshot_buffer(queue.device().clone(), (dims.0, dims.1)),
+                dims,
+            };
+            save_out
+                .send(output_image)
+                .expect("Failed to send initial images");
+        }
+        // create directory recursively
+        let output_dir = Path::new(&basedir).join("dist");
+        std::fs::create_dir_all(&output_dir).expect("Failed to create directory");
+        let shot_writer = ShotWriter {
+            num_images: 0,
+            output_dir: output_dir,
+        };
+        let saving_thread = thread::spawn({ || save_images(shot_writer, save_in, save_out) });
+        let saving_thread = Some(saving_thread);
+        let frame_capture = RefCell::new(capture::FrameCapture::new(
+            queue.device().clone(),
+            window.msaa_samples(),
+            [dims.0 as u32, dims.1 as u32],
+        ));
+        Shots {
+            num_shots: Cell::new(0),
+            frames_since_empty: Cell::new(3),
+            images_in,
+            images_out,
+            saving_thread,
+            frame_capture,
+            basedir: basedir.to_string(),
+        }
+    }
+
+    pub fn output_dir(&mut self, subdir: &str) {
+        // create directory recursively
+        let output_dir = Path::new(&self.basedir).join("dist").join(subdir);
+        std::fs::create_dir_all(&output_dir).expect("Failed to create directory");
+
+        self.images_out.send(Msg::ChangeDir(output_dir)).ok();
+    }
+
     pub fn capture(&self, frame: &Frame) {
         let num_shots = self.num_shots.get();
         let mut frames_since_empty = self.frames_since_empty.get();
@@ -164,7 +203,7 @@ impl ShotWriter {
     fn save(&mut self, screenshot_buffer: Buffer) {
         fn write(
             screenshot_buffer: &[[u8; NUM_COLOURS]],
-            screenshot_path: String,
+            screenshot_path: PathBuf,
             dims: (usize, usize),
         ) {
             let buf: &[u8] = unsafe {
@@ -187,11 +226,9 @@ impl ShotWriter {
         }
         if let Ok(buffer) = screenshot_buffer.buffer.read() {
             self.num_images += 1;
-            let screenshot_path = format!(
-                "{}{}",
-                env!("CARGO_MANIFEST_DIR"),
-                format!("/screenshot{}.png", self.num_images)
-            );
+            let screenshot_path = self
+                .output_dir
+                .join(&format!("screenshot{}.png", self.num_images));
             write(&(*buffer), screenshot_path, screenshot_buffer.dims);
         }
     }
@@ -212,22 +249,6 @@ fn new_input_image(device: Arc<vk::Device>, dims: [u32; 2]) -> Arc<vk::Attachmen
     )
     .expect("Failed to create input image")
 }
-/*
-fn new_inter_uint_image(device: Arc<vk::Device>, dims: [u32; 2]) -> Arc<vk::AttachmentImage> {
-    vk::AttachmentImage::with_usage(
-        device,
-        dims,
-        vk::Format::R8G8B8A8Srgb,
-        vk::ImageUsage {
-            transfer_source: true,
-            transfer_destination: true,
-            sampled: true,
-            ..vk::ImageUsage::none()
-        },
-    )
-    .expect("Failed to create input image")
-}
-*/
 
 fn new_output_image(device: Arc<vk::Device>, dims: [u32; 2]) -> Arc<vk::AttachmentImage> {
     vk::AttachmentImage::with_usage(
@@ -242,26 +263,7 @@ fn new_output_image(device: Arc<vk::Device>, dims: [u32; 2]) -> Arc<vk::Attachme
     )
     .expect("Failed to create input image")
 }
-/*
-fn new_output_image(
-    device: Arc<vk::Device>,
-    dims: vk::image::Dimensions,
-) -> Arc<vk::StorageImage<vk::Format>> {
-    vk::StorageImage::with_usage(
-        device.clone(),
-        dims,
-        vk::Format::R8G8B8A8Uint,
-        vk::ImageUsage {
-            transfer_source: true,
-            color_attachment: true,
-            storage: true,
-            ..vk::ImageUsage::none()
-        },
-        device.active_queue_families(),
-    )
-    .expect("Failed to create output image")
-}
-*/
+
 fn new_screenshot_buffer(
     device: Arc<vk::Device>,
     dims: (usize, usize),

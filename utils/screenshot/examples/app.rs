@@ -4,6 +4,7 @@ use std::time::Duration;
 
 struct Model {
     screenshot: Shots,
+    subdir_count: usize,
 }
 
 fn main() {
@@ -18,8 +19,11 @@ fn model(app: &App) -> Model {
         .event(window_event)
         .build()
         .unwrap();
-    let screenshot = screenshot::new(app, window_id);
-    Model { screenshot }
+    let screenshot = Shots::new(app, window_id, env!("CARGO_MANIFEST_DIR"));
+    Model {
+        screenshot,
+        subdir_count: 0,
+    }
 }
 
 fn view(app: &App, model: &Model, frame: &Frame) {
@@ -71,10 +75,18 @@ fn view(app: &App, model: &Model, frame: &Frame) {
 fn window_event(_app: &App, model: &mut Model, event: WindowEvent) {
     match event {
         KeyPressed(key) => {
-            if let Key::S = key {
-                // Adds a screenshot to the queue to be taken
-                model.screenshot.take();
-            }
+            match key {
+                Key::S => {
+                    model.screenshot.take();
+                }
+                Key::D => {
+                    model
+                        .screenshot
+                        .output_dir(&format!("subdir{}", model.subdir_count));
+                    model.subdir_count += 1;
+                }
+                _ => {}
+            };
         }
         KeyReleased(_key) => {}
         MouseMoved(_pos) => {}
